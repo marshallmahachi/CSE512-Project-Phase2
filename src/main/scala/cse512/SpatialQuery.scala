@@ -129,7 +129,24 @@ object SpatialQuery extends App{
     pointDf.createOrReplaceTempView("point")
 
     // YOU NEED TO FILL IN THIS USER DEFINED FUNCTION
-    spark.udf.register("ST_Within",(pointString1:String, pointString2:String, distance:Double)=>((true)))
+    //hahaha this one is easy .. :)
+    spark.udf.register("ST_Within",(pointString1:String, pointString2:String, distance:Double)=>({
+      val point_1 = pointString1.split(",")
+      val point_2 = pointString2.split(",")
+
+      var returnBool = false
+
+      var delta_x = point_1(0).toDouble - point_2(0).toDouble
+      var delta_y = point_1(1).toDouble - point_2(1).toDouble
+
+      val dist  = math.sqrt(math.pow(delta_x, 2) + math.pow(delta_y, 2))
+
+      if (dist <= distance) {
+        returnBool = true
+      }
+
+      returnBool
+    }))
 
     val resultDf = spark.sql("select * from point where ST_Within(point._c0,'"+arg2+"',"+arg3+")")
     resultDf.show()
@@ -146,7 +163,23 @@ object SpatialQuery extends App{
     pointDf2.createOrReplaceTempView("point2")
 
     // YOU NEED TO FILL IN THIS USER DEFINED FUNCTION
-    spark.udf.register("ST_Within",(pointString1:String, pointString2:String, distance:Double)=>((true)))
+    spark.udf.register("ST_Within",(pointString1:String, pointString2:String, distance:Double)=>({
+      val point_1 = pointString1.split(",")
+      val point_2 = pointString2.split(",")
+
+      var returnBool = false
+
+      var delta_x = point_1(0).toDouble - point_2(0).toDouble
+      var delta_y = point_1(1).toDouble - point_2(1).toDouble
+
+      val dist  = math.sqrt(math.pow(delta_x, 2) + math.pow(delta_y, 2))
+
+      if (dist <= distance) {
+        returnBool = true
+      }
+
+      returnBool
+    }))
     val resultDf = spark.sql("select * from point1 p1, point2 p2 where ST_Within(p1._c0, p2._c0, "+arg3+")")
     resultDf.show()
 
